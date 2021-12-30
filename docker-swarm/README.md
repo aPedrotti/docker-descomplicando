@@ -4,7 +4,16 @@
 - docker
 - vagrant
 
-Run a 'vagrant up' to setup a cluster with 1 manager / 2 workers (check Vagranfile for details)
+Run a `vagrant up` to setup a cluster with 1 manager / 2 workers (check Vagranfile for details)
+
+Support vagrant commands:
+- validate - Check file template
+- init - prepare environment
+- up - provision vms
+- ssh <vm_name> - login at vm
+- halt - shutdown vm
+- resume <vm_name> - start vm
+- destroy -f - delete all
 
 ## Release notes
 #### What it is:
@@ -84,10 +93,9 @@ apt-get install -y nfs-common
 mount -t nfs 10.10.10.10:/var/lib/docker/volumes/myvol /var/lib/docker/volumes/myvol
 ```
 
-### - Networking
+## - Networking
 
 `$ docker network create -d overlay my-swarm-net`
-
 
 `$ docker service create --name nginx --network my-swarm-net -p 8080:80 nginx`
 
@@ -105,5 +113,26 @@ And add/rm published ports: `$ docker service update --publish-add 9999 nginx2`
 <!--
 ### - Rolling(in) RollingOut
 -->
+
+
+## - SECRETS
+`$ echo -n "My Custom Secret" | docker secret create my-sec -`
+`$ docker secret ls`
+#### From file
+`docker secret create file.txt`
+### 
+`$ docker service create --name nginx --network my-swarm-net -p 8080:80 --secret my-sec nginx`
+
+Mounted by default at `/run/secrets/` as 444 (Read-only file system)
+
+`$ docker service update --secreat-add new-sec`
+
+Can be Customized as:
+
+`--secret src=my-sec,dst=/app/file,uid=200,gid=nginx,mode=400`
+
+`$ docker service create --name nginx --network my-swarm-net -p 8080:80 --secret src=my-sec-from-file,target=my-secc,uid=101,gid=101,mode=400 --replicas=3 nginx`
+
+Using Local Files Secrets is good practice mix with other vault tool - e.g. ansible vault
 
 
