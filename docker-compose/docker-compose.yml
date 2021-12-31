@@ -1,6 +1,4 @@
-version: "3"
-networks:
-  webserver:
+version: "3.9"
 services:
   web:
     image: nginx
@@ -12,8 +10,20 @@ services:
       replicas: 5
       resources: 
         limits:
-          cpus: 0.1
+          cpus: "0.1"
           memory: 50M
+        reservations:
+          cpus: "0.05"
+          memory: 25M
       restart_policy:
         condition: on-failure
-      
+  db:
+    image: mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - webserver
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD="true"
+networks:
+  webserver:

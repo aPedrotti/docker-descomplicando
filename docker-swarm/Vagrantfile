@@ -4,7 +4,9 @@ $install_docker_script = <<SCRIPT
 echo Installing Docker...
 curl -sSL https://get.docker.com/ | sh
 sudo usermod -aG docker vagrant
-sudo apt install docker-compose -y
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 SCRIPT
 $manager_script = <<SCRIPT
 echo Swarm Init...
@@ -24,6 +26,7 @@ echo "alias ds='docker ps'" >> /home/vagrant/.bashrc
 echo "alias dsv='docker service'" >> /home/vagrant/.bashrc
 echo "alias dsw='docker swarm'" >> /home/vagrant/.bashrc
 echo "alias dn='docker node'" >> /home/vagrant/.bashrc
+echo "alias dc='docker-compose'" >> /home/vagrant/.bashrc
 SCRIPT
 
 Vagrant.configure('2') do |config|

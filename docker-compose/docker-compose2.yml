@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  webpage:
+    depends_on:
+      - database
+    image: wordpress
+    ports:
+    - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_NAME: wordpress_db
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: "naosei"
+  database:
+    image: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "naosei"
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_USER: wordpress_user
+      MYSQL_PASSWORD: "naosei" 
+networks:
+  webpage:
+volumes:
+  db_data:
