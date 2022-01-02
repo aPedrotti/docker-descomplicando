@@ -1,0 +1,7 @@
+alias d='docker'
+alias de='docker exec -it'
+alias ds='docker ps'
+alias dsv='docker service'
+alias dsw='docker swarm'
+alias dn='docker node'
+alias dc='docker-compose'

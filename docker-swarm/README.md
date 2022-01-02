@@ -1,20 +1,4 @@
 #       ===== DOCKER SWARM =====
-## Create Environment
-**Requirements:**
-- docker
-- vagrant
-
-Run a `vagrant up` to setup a cluster with 1 manager / 2 workers (check Vagranfile for details)
-
-Support vagrant commands:
-- validate - Check file template
-- init - prepare environment
-- up - provision vms
-- ssh <vm_name> - login at vm
-- halt - shutdown vm
-- resume <vm_name> - start vm
-- destroy -f - delete all
-
 ## Release notes
 #### What it is:
 It has a MANAGER a WORKER to balance workloads evenly (as per config)
