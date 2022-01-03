@@ -21,6 +21,6 @@ receivers:
     - name: 'slack'
       slack_configs:
         - send_resolved: true
-          username: 'pedrotti'
+          username: '<Your user name>'
           channel: '#alerts'
-          api_url: 'https://hooks.slack.com/services/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'
+          api_url: '<Your webkook URL>'
