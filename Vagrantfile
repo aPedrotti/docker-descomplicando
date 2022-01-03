@@ -11,12 +11,12 @@ SCRIPT
 $manager_script = <<SCRIPT
 echo Swarm Init...
 sudo docker swarm init --listen-addr 10.10.10.10:2377 --advertise-addr 10.10.10.10:2377
-sudo docker swarm join-token --quiet worker > /vagrant/worker_token
+sudo docker swarm join-token --quiet worker > /home/vagrant/docker/worker_token
 apt-get install nfs-server -y
 SCRIPT
 $worker_script = <<SCRIPT
 echo Swarm Join...
-sudo docker swarm join --token $(cat /vagrant/worker_token) 10.10.10.10:2377
+sudo docker swarm join --token $(cat /home/vagrant/docker/worker_token) 10.10.10.10:2377
 apt-get install nfs-common -y
 SCRIPT
 $aliases = <<SCRIPT
@@ -27,7 +27,6 @@ echo "alias dsv='docker service'" >> /home/vagrant/.bashrc
 echo "alias dsw='docker swarm'" >> /home/vagrant/.bashrc
 echo "alias dn='docker node'" >> /home/vagrant/.bashrc
 echo "alias dc='docker-compose'" >> /home/vagrant/.bashrc
-echo "cd /vagrant" >> /home/vagrant/.bash_profile
 SCRIPT
 
 Vagrant.configure('2') do |config|
@@ -37,12 +36,17 @@ Vagrant.configure('2') do |config|
         manager.vm.box_check_update = true
         manager.vm.hostname = "manager" 
         manager.vm.network :private_network, ip: "10.10.10.10", hostname: true
-        manager.vm.network :forwarded_port, guest: 8080 , host: 8080
-        manager.vm.network :forwarded_port, guest: 8888 , host: 8888
+        for n in 8080..8089
+            manager.vm.network :forwarded_port, guest: n , host: n
+        end
+        for n in 5000..5010
+            manager.vm.network :forwarded_port, guest: n , host: n
+        end
+        manager.vm.network :forwarded_port, guest: 3000 , host: 3000
         manager.vm.network :forwarded_port, guest: 3306 , host: 3306
         manager.vm.network :forwarded_port, guest: 5432 , host: 5432
-        manager.vm.network :forwarded_port, guest: 5000 , host: 5000
-        manager.vm.synced_folder ".", "/vagrant"
+        manager.vm.network :forwarded_port, guest: 6379 , host: 6379
+        manager.vm.synced_folder ".", "/home/vagrant/docker"
         manager.vm.provision "shell", inline: $install_docker_script, privileged: true
         manager.vm.provision "shell", inline: $manager_script, privileged: true
         manager.vm.provision "shell", inline: $aliases
@@ -57,7 +61,7 @@ Vagrant.configure('2') do |config|
             worker.vm.box_check_update = true
             worker.vm.hostname = "worker0#{i}"
             worker.vm.network :private_network, ip: "10.10.10.1#{i}"
-            worker.vm.synced_folder "./", "/vagrant"
+            worker.vm.synced_folder "./", "/home/vagrant/docker"
             worker.vm.provision "shell", inline: $install_docker_script, privileged: true
             worker.vm.provision "shell", inline: $worker_script, privileged: true
             worker.vm.provision "shell", inline: $aliases

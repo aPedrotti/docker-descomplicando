@@ -1,0 +1,105 @@
+version: "3.7"
+
+services:
+  
+  prometheus: 
+    image: linuxtips/prometheus_alpine
+    volumes:
+      - ./conf/prometheus/:/etc/prometheus/
+      - prometheus_data:/var/lib/prometheus
+    networks:
+      - backend
+    ports:
+      - "8081:9090"
+  
+  node-exporter:
+    image: linuxtips/node-exporter_alpine #like an agent for prometheus
+    hostname: '{{.Node.ID}}'
+    volumes:
+      - /proc:/usr/proc
+      - /sys:/usr/sys
+      - /:/rootfs
+    networks:
+      - backend
+    ports:
+      - "8082:9100"
+    deploy:
+      mode: global
+
+  alertmanager:
+    image: linuxtips/alertmanager_alpine
+    volumes:
+      - ./conf/alertmanager/:/etc/alertmanager/
+    networks:
+      - backend
+    ports:
+      - "8083:9093"
+
+  cadvisor:
+    image: google/cadvisor
+    hostname: '{{.Node.ID}}'
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - backend
+    ports:
+      - "8080:8080"
+    deploy:
+      mode: global
+
+  grafana:
+    image: nopp/grafana_alpine
+    depends_on:
+      - prometheus
+    volumes:
+      - ./conf/grafana/grafana.db:/conf/grafana/grafana.db
+    env_file:
+      - ./conf/grafana.config
+    networks:
+      - backend
+      - frontend
+    ports:
+      - "3000:3000"
+
+## Optional if you have enough resources
+#  rocketchat:
+#    image: rocketchat/rocket.chat
+#    volumes:
+#      - uploads:/app/uploads
+#    environment:
+#      - PORT=8084
+#      - ROOT_URL=http://localhost:8084
+#      - MONGO_URL=mongodb://mongo:27017/rocketchat
+#      - MONGO_OPLOG_URL=mongodb://mongo:27017/local
+#    depends_on:
+#      - mongodb
+#    networks:
+#      - backend
+#    ports:
+#      - 8084:8084
+#  mongodb:
+#    image: mongo:3.2
+#    networks:
+#      - backend
+#    ports:
+#      - "27017"
+#    volumes:
+#      - mongodb_data:/data/db
+#    command: mongd --smallfiles --oplogSize 128 --replSet rs0
+#  mongodb-init-replica:
+#    image: mongo:3.2
+#    depends_on:
+#      - mongodb
+    
+networks:
+  frontend:
+  backend: 
+volumes:
+  prometheus_data:
+  grafana_data:
+#  rocket_uploads:
+#  mongodb_data: 
